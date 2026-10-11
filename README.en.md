@@ -51,6 +51,16 @@ In the school design, servers sit in **VLAN 30 – Server (172.16.0.64/27)**. Th
 7. **Ticket.** `employe01` opened an incident. It was assigned to `it01` and the IT group, followed up and resolved, then **closed** by the requester.
 8. **Acceptance testing.** Every test in the test plan passed. Deviations and the corrections made are documented.
 
+## Answers to the lab questions (short version)
+
+1. **VM IP vs host IP:** The hypervisor's IP is only used to manage it. Each VM has its own virtual network card (its own MAC and IP), so GLPI is reached at the GLPI VM's IP (192.168.56.20), not the host's.
+2. **Internet DNS on GLPI:** An internet DNS server does not know the internal zone `exemple.lan`, so GLPI cannot find the domain controller: LDAP and AD logins fail (NXDOMAIN observed in the lab).
+3. **Separate OUs:** They let you apply different rules to each object type (GPO, delegation, rights), keep the directory readable, and limit GLPI's LDAP search to real users.
+4. **objectGUID:** A unique ID that never changes, even if the account is renamed or moved, so GLPI always recognises the same person and keeps their tickets and assets linked.
+5. **Limiting Self-Service:** This is least privilege. Otherwise a user could give themselves admin rights, redirect tickets or falsify the inventory.
+6. **What an agent reports:** Computer name, operating system, manufacturer, model and serial number, CPU, RAM, disks, network cards (IP, MAC), installed software and the logged-in user.
+7. **Solved vs Closed:** Solved means the technician applied and documented the fix. Closed means the requester approved it (or a time limit expired) and the ticket is locked. Until it is closed, the requester can refuse the solution and the ticket reopens.
+
 ## Main issues fixed
 
 | Issue | Fix |

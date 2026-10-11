@@ -38,6 +38,16 @@ Dans le schéma de l'école, les serveurs sont dans le **VLAN 30 – Serveur (17
 7. **Ticket** — incident créé par `employe01`, attribué à `it01` + groupe IT, suivi, résolu puis **clos** par le demandeur.
 8. **Recette** — plan de recette entièrement conforme, écarts et corrections consignés.
 
+## Réponses aux questions du TP (version courte)
+
+1. **IP de la VM ou IP de l'hôte :** l'IP de l'hyperviseur sert uniquement à l'administrer. Chaque VM a sa propre carte réseau virtuelle (MAC et IP), donc on joint GLPI par l'IP de la VM GLPI (192.168.56.20), pas par celle de l'hôte.
+2. **DNS Internet sur GLPI :** un DNS Internet ne connaît pas la zone interne `exemple.lan`. GLPI ne trouve plus le contrôleur de domaine, donc la liaison LDAP et les connexions AD échouent (NXDOMAIN constaté).
+3. **OU séparées :** elles permettent d'appliquer des règles différentes à chaque type d'objet (GPO, délégation, droits), de garder un annuaire lisible et de limiter la recherche LDAP de GLPI aux vrais utilisateurs.
+4. **objectGUID :** identifiant unique qui ne change jamais, même si le compte est renommé ou déplacé. GLPI reconnaît toujours la même personne, et ses tickets et son matériel restent rattachés.
+5. **Limiter le Self-Service :** c'est le moindre privilège. Sinon, un utilisateur pourrait s'attribuer des droits d'administrateur, détourner des tickets ou fausser l'inventaire.
+6. **Données remontées par un agent :** nom du poste, système d'exploitation, fabricant, modèle et numéro de série, processeur, mémoire, disques, cartes réseau (IP, MAC), logiciels installés et utilisateur connecté.
+7. **Résolu ou Clos :** Résolu = le technicien a appliqué et documenté la solution. Clos = le demandeur a validé (ou le délai est dépassé) et le ticket est figé. Tant qu'il n'est pas clos, le demandeur peut refuser la solution et le ticket est rouvert.
+
 ## Principaux écarts corrigés
 
 | Écart | Correction |
