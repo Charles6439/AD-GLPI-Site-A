@@ -1,0 +1,86 @@
+# Active Directory + GLPI deployment — Site A
+
+[🇫🇷 Version française](README.md) · 🇬🇧 English
+
+Lab work for the French professional qualification **Administrateur d'Infrastructures Sécurisées (AIS)**, which covers secure infrastructure administration, at GRETA Essonne.
+It was built in a home lab (VirtualBox) between 6 and 11 October 2026.
+
+## Project goal
+
+The goal was to bring a company's **Site A** environment back into service using existing virtual machines:
+
+- a **Windows Server 2022 domain controller** running Active Directory and DNS for the domain `exemple.lan`;
+- a **GLPI 11 server** on Debian 13, connected to Active Directory over **LDAP**.
+
+GLPI was then run like a real IT service desk: accounts imported from AD, user profiles, a hardware inventory, and one support ticket taken through its full lifecycle.
+
+## Lab architecture
+
+| Machine | Role | Lab address |
+|---|---|---|
+| Serveur_TP (`WIN-RG5VDD2MS10`, DC01) | Windows Server 2022: AD DS and DNS for `exemple.lan` | 192.168.56.10 |
+| GLPI-Site-A (`glpi01`) | Debian 13: Apache, MariaDB, PHP, GLPI 11.0.4 | 192.168.56.20 |
+| Windows host laptop | Test client (browser, RDP, SSH) | 192.168.56.1 |
+
+Network: VirtualBox **host-only** `192.168.56.0/24`. GLPI also has a NAT adapter for internet access.
+
+In the school design, servers sit in **VLAN 30 – Server (172.16.0.64/27)**. The lab uses a flat network with no VLANs or physical devices, so the switch, router and firewall were declared manually in GLPI.
+
+![Site A reference diagram](captures/00-reference/schema_site_A_ecole.png)
+
+## What I did (8 stages)
+
+1. **Inventory of what exists.** I listed the existing VMs, their network adapters and their roles. Two problems showed up: the adapters were set to "not attached", and AD and GLPI were on different subnets.
+2. **Network and DNS.** I moved everything onto 192.168.56.0/24, removed stale DNS records and registered `glpi01.exemple.lan`. Forward and reverse name resolution were both tested.
+3. **Active Directory.**
+   - OUs: `Utilisateurs` (with Direction, Employes and IT inside), `Groupes`, `Postes` and `ComptesService`.
+   - Groups: `GRP-Direction`, `GRP-Employes`, `GRP-IT` and `GRP-GLPI-SVC`.
+   - Accounts: `direction01`, `employe01`, `it01`, plus the `svc-glpi` service account, which is **not an admin**.
+4. **LDAP link.** I created the `AD-Site-A` directory in GLPI with these settings, then tested the connection successfully and imported the users:
+   - port 389;
+   - Base DN `DC=exemple,DC=lan`;
+   - bind account `svc-glpi`;
+   - login field `samaccountname`;
+   - sync field `objectGUID`.
+5. **Profiles.** Requesters got Self-Service and `it01` got Technician. I verified the rights: `employe01` is refused access to the configuration pages.
+6. **Inventory.**
+   - Created the Site A entities and locations.
+   - Added computers: DC01 was inventoried by the GLPI Agent; GLPI01 and CLIENT01 were declared manually.
+   - Added the network devices.
+   - Wrote up the GLPI Agent installation procedure.
+7. **Ticket.** `employe01` opened an incident. It was assigned to `it01` and the IT group, followed up and resolved, then **closed** by the requester.
+8. **Acceptance testing.** Every test in the test plan passed. Deviations and the corrections made are documented.
+
+## Main issues fixed
+
+| Issue | Fix |
+|---|---|
+| VirtualBox network adapters set to "not attached" | Attached to the host-only network, cable connected |
+| AD and GLPI on two subnets with no routing between them | GLPI moved to 192.168.56.20 |
+| The GLPI VM was also used by another class | Full clone "GLPI-Site-A"; the original is untouched |
+| Stale DNS records; the AD's own DNS client pointed to 8.8.8.8 | Records cleaned up; the AD now uses itself for DNS |
+| dhcpcd kept overwriting `resolv.conf` | Added `nohook resolv.conf` and restarted the interface |
+| The old LDAP directory used a domain admin account | New directory using the `svc-glpi` service account |
+
+I troubleshot in a fixed order (**network → IP → DNS → AD → LDAP → GLPI**) and took a snapshot before every change.
+
+## Repository contents
+
+```
+rapport/   full lab report (HTML + PDF, in French)
+captures/  89 screenshots sorted by stage (evidence)
+docs/      key-concepts reference guide (PDF, English)
+```
+
+## Security
+
+This repository contains no passwords, keys or secrets, and neither do the screenshots. All addresses belong to a private host-only lab.
+
+## Limitations and next steps
+
+- LDAP is unencrypted on port 389; the next step is **LDAPS on port 636**.
+- There is no Windows client VM yet; the plan is to add one with the **GLPI Agent** (option A).
+- AD groups are not yet synced automatically to GLPI groups.
+
+---
+Charles MADUBA — AIS professional qualification
