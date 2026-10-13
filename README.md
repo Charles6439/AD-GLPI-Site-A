@@ -30,7 +30,7 @@ Dans le schéma de l'école, les serveurs sont dans le **VLAN 30 – Serveur (17
 ## Ce que j'ai réalisé (8 étapes)
 
 1. **Récolement** — inventaire des VMs existantes, de leurs cartes réseau et de leurs rôles. Constat : cartes « non attachées », AD et GLPI sur des sous-réseaux différents.
-2. **Réseau et DNS** — remise en cohérence sur 192.168.56.0/24, nettoyage des anciens enregistrements DNS, enregistrement `glpi01.exemple.lan`, résolution testée dans les deux sens.
+2. **Réseau et DNS** — remise en cohérence sur 192.168.56.0/24, nettoyage des anciens enregistrements DNS, enregistrement `glpi01.exemple.lan`, connectivité et résolution testées dans les deux sens (GLPI → AD et AD → GLPI).
 3. **Active Directory** — OU `Utilisateurs` (Direction, Employes, IT), `Groupes`, `Postes`, `ComptesService` ; groupes `GRP-Direction`, `GRP-Employes`, `GRP-IT`, `GRP-GLPI-SVC` ; comptes `direction01`, `employe01`, `it01` et compte de service `svc-glpi` (**non administrateur**).
 4. **Liaison LDAP** — annuaire `AD-Site-A` dans GLPI (port 389, Base DN `DC=exemple,DC=lan`, connexion avec `svc-glpi`, identifiant `samaccountname`, synchronisation `objectGUID`), test réussi et import des utilisateurs.
 5. **Profils** — Self-Service pour les demandeurs, Technician pour `it01` ; vérification des droits (accès à la configuration refusé à `employe01`).
@@ -61,12 +61,30 @@ Dans le schéma de l'école, les serveurs sont dans le **VLAN 30 – Serveur (17
 
 Méthode de dépannage suivie : **réseau → IP → DNS → AD → LDAP → GLPI**, avec un snapshot avant chaque modification.
 
+## Mission complémentaire : sécurisation et recette (13 octobre 2026)
+
+Suite du TP sur les mêmes VMs, dossier [`mission-securisation/`](mission-securisation/) :
+
+1. **État des services** — ADWS, DNS, DHCP, domaine AD, Apache, MariaDB, disque et mémoire contrôlés.
+2. **Connectivité et DNS** — GLPI ↔ AD par IP et par nom ; port 80 ouvert, 443 fermé (GLPI en HTTP seulement).
+3. **Compte nominatif** — `admin-sitea` membre du groupe `sudo`, `sudo whoami` → root.
+4. **SSH et pare-feu** — `PermitRootLogin no` (vérifié avec `sshd -t` / `sshd -T`) ; UFW : entrant refusé par défaut, seuls 22/TCP et 80/TCP ouverts ; MariaDB écoute uniquement sur 127.0.0.1.
+5. **Journaux** — journalctl (ssh, apache2, mariadb) et Windows (Sécurité 4624, Système, DNS Server).
+6. **Ticket GLPI** — demande n° 2 « Sécurisation de l'accès d'administration au serveur GLPI Site A », catégorie Sécurité > Administration serveur, résolue puis close.
+7. **Recette** — tous les contrôles conformes.
+
+Incidents traités : crash de la VM GLPI (mémoire de l'hôte saturée) → restauration du snapshot pris avant la modification ; erreur LDAP après UFW → diagnostic ping + port 389 : contrôleur de domaine éteint, pas le pare-feu.
+
 ## Contenu du dépôt
 
 ```
 rapport/   compte rendu complet du TP (HTML + PDF, en français)
 captures/  89 captures d'écran classées par étape (preuves)
 docs/      guide des concepts clés (PDF, en anglais)
+mission-securisation/
+  rapport/   compte rendu de la mission (HTML + PDF, en français)
+  captures/  captures de preuve classées par étape
+  docs/      guide des concepts clés de la mission (PDF, en anglais)
 ```
 
 ## Sécurité

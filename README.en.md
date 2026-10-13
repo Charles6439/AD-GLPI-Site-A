@@ -31,7 +31,7 @@ In the school design, servers sit in **VLAN 30 – Server (172.16.0.64/27)**. Th
 ## What I did (8 stages)
 
 1. **Inventory of what exists.** I listed the existing VMs, their network adapters and their roles. Two problems showed up: the adapters were set to "not attached", and AD and GLPI were on different subnets.
-2. **Network and DNS.** I moved everything onto 192.168.56.0/24, removed stale DNS records and registered `glpi01.exemple.lan`. Forward and reverse name resolution were both tested.
+2. **Network and DNS.** I moved everything onto 192.168.56.0/24, removed stale DNS records and registered `glpi01.exemple.lan`. Name resolution and connectivity were tested in both directions (GLPI → AD and AD → GLPI).
 3. **Active Directory.**
    - OUs: `Utilisateurs` (with Direction, Employes and IT inside), `Groupes`, `Postes` and `ComptesService`.
    - Groups: `GRP-Direction`, `GRP-Employes`, `GRP-IT` and `GRP-GLPI-SVC`.
@@ -74,12 +74,30 @@ In the school design, servers sit in **VLAN 30 – Server (172.16.0.64/27)**. Th
 
 I troubleshot in a fixed order (**network → IP → DNS → AD → LDAP → GLPI**) and took a snapshot before every change.
 
+## Follow-up mission: securing and acceptance testing (13 October 2026)
+
+Same VMs, folder [`mission-securisation/`](mission-securisation/):
+
+1. **Service status** — ADWS, DNS, DHCP, AD domain, Apache, MariaDB, disk and memory checked.
+2. **Connectivity and DNS** — GLPI ↔ AD by IP and by name; port 80 open, 443 closed (GLPI is HTTP only).
+3. **Named admin account** — `admin-sitea` in the `sudo` group, `sudo whoami` → root.
+4. **SSH and firewall** — `PermitRootLogin no` (checked with `sshd -t` / `sshd -T`); UFW denies incoming by default, only 22/TCP and 80/TCP open; MariaDB listens on 127.0.0.1 only.
+5. **Logs** — journalctl (ssh, apache2, mariadb) and Windows (Security 4624, System, DNS Server).
+6. **GLPI ticket** — request #2 "Sécurisation de l'accès d'administration au serveur GLPI Site A", category Sécurité > Administration serveur, solved then closed.
+7. **Acceptance tests** — every check passed.
+
+Incidents handled: the GLPI VM crashed (host out of memory) → restored the snapshot taken before the change; LDAP error after enabling UFW → ping + port 389 diagnosis showed the domain controller was switched off, not a firewall issue.
+
 ## Repository contents
 
 ```
 rapport/   full lab report (HTML + PDF, in French)
 captures/  89 screenshots sorted by stage (evidence)
 docs/      key-concepts reference guide (PDF, English)
+mission-securisation/
+  rapport/   mission report (HTML + PDF, in French)
+  captures/  evidence screenshots sorted by stage
+  docs/      mission key-concepts guide (PDF, English)
 ```
 
 ## Security
