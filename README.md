@@ -80,11 +80,11 @@ Incidents traités : crash de la VM GLPI (mémoire de l'hôte saturée) → rest
 ```
 rapport/   compte rendu complet du TP (HTML + PDF, en français)
 captures/  89 captures d'écran classées par étape (preuves)
-docs/      guide des concepts clés (PDF, en anglais)
+docs/      guide des concepts clés (PDF, en anglais), avec accès au labo et rejeu des 8 étapes
 mission-securisation/
   rapport/   compte rendu de la mission (HTML + PDF, en français)
   captures/  captures de preuve classées par étape
-  docs/      guide des concepts clés de la mission (PDF, en anglais)
+  docs/      guide des concepts clés de la mission (PDF, en anglais), avec accès au labo et rejeu
 ```
 
 ## Sécurité

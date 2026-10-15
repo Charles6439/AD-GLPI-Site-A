@@ -93,11 +93,11 @@ Incidents handled: the GLPI VM crashed (host out of memory) → restored the sna
 ```
 rapport/   full lab report (HTML + PDF, in French)
 captures/  89 screenshots sorted by stage (evidence)
-docs/      key-concepts reference guide (PDF, English)
+docs/      key-concepts reference guide (PDF, English), incl. lab access and 8-stage replay
 mission-securisation/
   rapport/   mission report (HTML + PDF, in French)
   captures/  evidence screenshots sorted by stage
-  docs/      mission key-concepts guide (PDF, English)
+  docs/      mission key-concepts guide (PDF, English), incl. lab access and replay
 ```
 
 ## Security
